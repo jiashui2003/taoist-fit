@@ -419,6 +419,8 @@ const App = () => {
             activityLog={activityLog}
             lingQiBalance={lingQiBalance}
             onExport={() => setActiveTab('export')}
+            onAchievements={() => setActiveTab('achievements')}
+            achievementStats={achievementStats}
           />
         );
       case 'shop':
@@ -496,10 +498,10 @@ const App = () => {
             label="百宝"
           />
           <NavButton
-            active={activeTab === 'achievements'}
-            onClick={() => setActiveTab('achievements')}
-            icon={<Trophy size={20} />}
-            label="成就"
+            active={activeTab === 'social'}
+            onClick={() => setActiveTab('social')}
+            icon={<Users size={20} />}
+            label="道友"
           />
         </div>
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { MOCK_INVENTORY } from '../constants';
-import { Scroll, Zap, Moon, Sparkles, Download } from 'lucide-react';
-import { HealthMetrics, ActivityEntry } from '../types';
+import { Scroll, Zap, Moon, Sparkles, Download, Trophy, ChevronRight } from 'lucide-react';
+import { HealthMetrics, ActivityEntry, AchievementStats } from '../types';
 import { ActivityTimeline } from './ActivityTimeline';
 
 interface BagViewProps {
@@ -9,9 +9,11 @@ interface BagViewProps {
   activityLog: ActivityEntry[];
   lingQiBalance: number;
   onExport?: () => void;
+  onAchievements?: () => void;
+  achievementStats?: AchievementStats;
 }
 
-export const BagView: React.FC<BagViewProps> = ({ metrics, activityLog, lingQiBalance, onExport }) => {
+export const BagView: React.FC<BagViewProps> = ({ metrics, activityLog, lingQiBalance, onExport, onAchievements, achievementStats }) => {
   // Calculate total from activity log
   const totalCalories = activityLog.reduce((sum, a) => sum + a.caloriesBurned, 0);
   const totalLingQi = activityLog.reduce((sum, a) => sum + a.lingQiGained, 0);
@@ -104,6 +106,29 @@ export const BagView: React.FC<BagViewProps> = ({ metrics, activityLog, lingQiBa
           </div>
         ))}
       </div>
+
+      {/* Achievement Entry Card */}
+      {onAchievements && (
+        <div className="mt-6">
+          <button
+            onClick={onAchievements}
+            className="w-full bg-gradient-to-r from-[#9C7D3C]/20 to-[#FFD700]/10 border border-[#9C7D3C]/30 rounded-2xl p-4 flex items-center justify-between hover:from-[#9C7D3C]/30 hover:to-[#FFD700]/20 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#9C7D3C] to-[#6B5421] flex items-center justify-center">
+                <Trophy size={24} className="text-white" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-bold text-[#1A1A1A]">我的成就</h3>
+                <p className="text-sm text-[#3A3A3A]">
+                  {achievementStats ? `已解锁 ${achievementStats.unlocked}/${achievementStats.total}` : '查看修炼成就'}
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={20} className="text-[#9C7D3C]" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
