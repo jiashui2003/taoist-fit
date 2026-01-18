@@ -8,6 +8,7 @@ import { SocialView } from './components/SocialView';
 import { OfflineBanner } from './components/OfflineBanner';
 import { MetricDetailView } from './components/MetricDetailView';
 import { AchievementView } from './components/AchievementView';
+import { ExportView } from './components/ExportView';
 import {
   CultivationStage,
   CultivationLevel,
@@ -35,7 +36,7 @@ import { useOnlineStatus } from './hooks/usePersistence';
 
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState<'home' | 'analysis' | 'bag' | 'shop' | 'social' | 'achievements'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'analysis' | 'bag' | 'shop' | 'social' | 'achievements' | 'export'>('home');
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -373,7 +374,14 @@ const App = () => {
           />
         );
       case 'bag':
-        return <BagView metrics={metrics} activityLog={activityLog} lingQiBalance={lingQiBalance} />;
+        return (
+          <BagView
+            metrics={metrics}
+            activityLog={activityLog}
+            lingQiBalance={lingQiBalance}
+            onExport={() => setActiveTab('export')}
+          />
+        );
       case 'shop':
         return <ShopView items={shopItems} lingQiBalance={lingQiBalance} onPurchase={handlePurchase} />;
       case 'social':
@@ -391,6 +399,16 @@ const App = () => {
             achievements={achievements}
             stats={achievementStats}
             onBack={() => setActiveTab('home')}
+          />
+        );
+      case 'export':
+        return (
+          <ExportView
+            metrics={metrics}
+            level={level}
+            fiveElements={fiveElementsInsight}
+            achievements={achievements}
+            onBack={() => setActiveTab('bag')}
           />
         );
       default:

@@ -1,6 +1,6 @@
 import React from 'react';
 import { MOCK_INVENTORY } from '../constants';
-import { Scroll, Zap, Moon, Sparkles } from 'lucide-react';
+import { Scroll, Zap, Moon, Sparkles, Download } from 'lucide-react';
 import { HealthMetrics, ActivityEntry } from '../types';
 import { ActivityTimeline } from './ActivityTimeline';
 
@@ -8,9 +8,10 @@ interface BagViewProps {
   metrics: HealthMetrics;
   activityLog: ActivityEntry[];
   lingQiBalance: number;
+  onExport?: () => void;
 }
 
-export const BagView: React.FC<BagViewProps> = ({ metrics, activityLog, lingQiBalance }) => {
+export const BagView: React.FC<BagViewProps> = ({ metrics, activityLog, lingQiBalance, onExport }) => {
   // Calculate total from activity log
   const totalCalories = activityLog.reduce((sum, a) => sum + a.caloriesBurned, 0);
   const totalLingQi = activityLog.reduce((sum, a) => sum + a.lingQiGained, 0);
@@ -19,10 +20,22 @@ export const BagView: React.FC<BagViewProps> = ({ metrics, activityLog, lingQiBa
     <div className="flex flex-col h-full overflow-y-auto pb-24 pt-12 px-4">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold font-serif">灵物秘宝</h2>
-        <div className="flex items-center gap-2 bg-[#BFA15F]/10 px-3 py-1.5 rounded-full">
-          <Sparkles size={14} className="text-[#BFA15F]" />
-          <span className="font-mono font-bold text-[#BFA15F]">{lingQiBalance}</span>
-          <span className="text-[10px] text-[#BFA15F]/70">灵气</span>
+        <div className="flex items-center gap-3">
+          {onExport && (
+            <button
+              onClick={onExport}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#9C7D3C]/20 hover:bg-[#9C7D3C]/30 text-[#9C7D3C] rounded-full text-sm font-bold transition-colors"
+              aria-label="导出报告"
+            >
+              <Download size={14} />
+              <span>导出</span>
+            </button>
+          )}
+          <div className="flex items-center gap-2 bg-[#BFA15F]/10 px-3 py-1.5 rounded-full">
+            <Sparkles size={14} className="text-[#BFA15F]" />
+            <span className="font-mono font-bold text-[#BFA15F]">{lingQiBalance}</span>
+            <span className="text-[10px] text-[#BFA15F]/70">灵气</span>
+          </div>
         </div>
       </div>
 
