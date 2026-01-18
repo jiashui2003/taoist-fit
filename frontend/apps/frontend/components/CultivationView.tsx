@@ -6,6 +6,7 @@ import { StatCard } from './StatCard';
 import { HealthMetrics, CultivationLevel } from '../types';
 import { LingQiModal, DaoXinModal, ShenShiModal, MasterAdviceModal } from './Modals';
 import { AICoachService } from '../services/AICoachService';
+import { formatMetricValue } from '../constants';
 
 
 interface CultivationViewProps {
@@ -143,14 +144,14 @@ export const CultivationView: React.FC<CultivationViewProps> = ({ metrics, level
       <div className="px-6 grid grid-cols-2 gap-4 mb-8">
         <StatCard
           label="道心 (HRV)"
-          value={metrics.hrv}
+          value={formatMetricValue('hrv', metrics.hrv)}
           unit="ms"
           icon={<Activity size={14} />}
           onClick={() => setModalOpen('daoxin')}
         />
         <StatCard
           label="心率 (HR)"
-          value={metrics.heartRate}
+          value={formatMetricValue('heartRate', metrics.heartRate)}
           unit="bpm"
         />
         <StatCard
@@ -162,7 +163,7 @@ export const CultivationView: React.FC<CultivationViewProps> = ({ metrics, level
         />
         <StatCard
           label="神识 (睡眠)"
-          value={metrics.sleepHours}
+          value={formatMetricValue('sleepHours', metrics.sleepHours)}
           unit="小时"
           onClick={() => setModalOpen('shenshi')}
         />

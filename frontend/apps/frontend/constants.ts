@@ -209,3 +209,37 @@ export const DEFAULT_EXTENDED_METRICS = {
   respiratoryRate: 16,
   bodyBattery: 75,
 };
+
+/**
+ * Format metric value based on metric type
+ * - Integer metrics: steps, calories, heartRate, stress, oxygen, respiratoryRate
+ * - 1 decimal: hrv, sleepHours, temp, vo2Max
+ * - Percentage: bodyBattery
+ */
+export const formatMetricValue = (key: string, value: number): string => {
+  if (typeof value !== 'number' || isNaN(value)) {
+    return '-';
+  }
+
+  // Integer display (no decimals)
+  const integerMetrics = [
+    'steps', 'calories', 'heartRate', 'stress',
+    'oxygen', 'respiratoryRate', 'restingHeartRate'
+  ];
+
+  // One decimal display
+  const oneDecimalMetrics = [
+    'hrv', 'sleepHours', 'temp', 'vo2Max', 'bodyBattery'
+  ];
+
+  if (integerMetrics.includes(key)) {
+    return Math.round(value).toString();
+  }
+
+  if (oneDecimalMetrics.includes(key)) {
+    return value.toFixed(1);
+  }
+
+  // Default: 1 decimal
+  return value.toFixed(1);
+};

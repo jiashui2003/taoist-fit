@@ -1,5 +1,5 @@
 import { db } from './DatabaseService';
-import { ExtendedHealthMetrics, MetricKey } from '../types';
+import { ExtendedHealthMetrics, MetricKey, CultivationStage } from '../types';
 import { AchievementService } from './AchievementService';
 
 /**
@@ -21,20 +21,20 @@ export class TestDataGenerator {
             const date = new Date(now - (days - 1 - i) * oneDay);
             const dateStr = date.toISOString().split('T')[0];
 
-            // Generate realistic health metrics
+            // Generate realistic health metrics (with proper formatting)
             const metrics: ExtendedHealthMetrics = {
-                heartRate: this.randomInRange(65, 85),
-                hrv: this.randomInRange(40, 70),
-                stress: this.randomInRange(25, 45), // Low stress for achievement
-                sleepHours: this.randomInRange(7, 9),
-                calories: this.randomInRange(1800, 2800),
-                steps: this.randomInRange(6000, 12000),
-                oxygen: this.randomInRange(96, 99),
-                temp: this.randomInRange(36.2, 36.8),
-                bodyBattery: this.randomInRange(75, 95), // High for achievement
-                vo2Max: this.randomInRange(35, 50),
-                restingHeartRate: this.randomInRange(55, 70),
-                respiratoryRate: this.randomInRange(14, 18)
+                heartRate: Math.round(this.randomInRange(65, 85)),         // Integer
+                hrv: Math.round(this.randomInRange(40, 70) * 10) / 10,    // 1 decimal
+                stress: Math.round(this.randomInRange(25, 45)),            // Integer
+                sleepHours: Math.round(this.randomInRange(7, 9) * 10) / 10, // 1 decimal
+                calories: Math.round(this.randomInRange(1800, 2800)),      // Integer
+                steps: Math.round(this.randomInRange(6000, 12000)),        // Integer
+                oxygen: Math.round(this.randomInRange(96, 99)),            // Integer
+                temp: Math.round(this.randomInRange(36.2, 36.8) * 10) / 10, // 1 decimal
+                bodyBattery: Math.round(this.randomInRange(75, 95)),       // Integer
+                vo2Max: Math.round(this.randomInRange(35, 50) * 10) / 10,  // 1 decimal
+                restingHeartRate: Math.round(this.randomInRange(55, 70)),  // Integer
+                respiratoryRate: Math.round(this.randomInRange(14, 18))    // Integer
             };
 
             // Save to IndexedDB
@@ -119,20 +119,24 @@ export class TestDataGenerator {
         await this.generateConsecutiveDays(30);
 
         // Check achievements
-        const level = { stage: 'foundation' as const, layer: 1, progress: 0 };
-        const history = await db.getRecentHealthMetrics(30);
+        const level = { stage: CultivationStage.Foundation, layer: 1, progress: 0, currentExp: 5000, maxExp: 20000, title: '筑基初期' };
         const metricHistory = await db.getRecentMetricHistory('heartRate', 30);
+        const stressHistory = await db.getRecentMetricHistory('stress', 30);
+        const energyHistory = await db.getRecentMetricHistory('bodyBattery', 30);
 
         // Initialize and check achievements
-        let achievements = AchievementService.initializeAchievements();
-        achievements = AchievementService.checkAllAchievements(
-            achievements,
+        const initialAchievements = AchievementService.initializeAchievements();
+        const result = AchievementService.checkAllAchievements(
+            initialAchievements,
+            30, // consecutive days
             metricHistory,
-            level,
-            30 // consecutive days
+            stressHistory,
+            energyHistory,
+            80, // fiveElementsScore
+            level
         );
 
-        const unlocked = achievements.filter(a => a.unlocked).length;
+        const unlocked = result.achievements.filter(a => a.unlocked).length;
 
         console.log(`✅ 测试数据生成完成`);
         console.log(`📊 生成天数: 30`);

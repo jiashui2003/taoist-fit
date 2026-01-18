@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from 'recharts';
 import { Settings, Activity, Footprints, Wind, Battery, Heart, Thermometer, Droplets } from 'lucide-react';
-import { STRESS_DATA, HRV_DATA, METRIC_CONFIGS } from '../constants';
+import { STRESS_DATA, HRV_DATA, METRIC_CONFIGS, formatMetricValue } from '../constants';
 import { StatCard } from './StatCard';
 import { FiveElementsCard } from './FiveElementsCard';
 import { MetricsToggle } from './MetricsToggle';
@@ -74,7 +74,7 @@ export const DataAnalysisView: React.FC<DataAnalysisViewProps> = ({
             <span className="w-1 h-4 bg-[#BFA15F] rounded-full"></span>
             心魔 (压力)
           </h3>
-          <span className="text-2xl font-bold text-[#BFA15F]">{metrics.stress}</span>
+          <span className="text-2xl font-bold text-[#BFA15F]">{formatMetricValue('stress', metrics.stress)}</span>
         </div>
 
         <div className="h-36 w-full">
@@ -108,7 +108,7 @@ export const DataAnalysisView: React.FC<DataAnalysisViewProps> = ({
             道心 (HRV)
           </h3>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-[#6B8EAD]">{metrics.hrv}</span>
+            <span className="text-2xl font-bold text-[#6B8EAD]">{formatMetricValue('hrv', metrics.hrv)}</span>
             <span className="text-xs text-gray-400">ms</span>
           </div>
         </div>
@@ -147,7 +147,7 @@ export const DataAnalysisView: React.FC<DataAnalysisViewProps> = ({
             <div key={config.key} onClick={() => onMetricClick?.(config.key)} className="cursor-pointer">
               <StatCard
                 label={`${config.label}(${config.cultivationName})`}
-                value={typeof value === 'number' ? value : '-'}
+                value={typeof value === 'number' ? formatMetricValue(config.key, value) : '-'}
                 unit={config.unit}
                 icon={METRIC_ICONS[config.key] || <div className="w-2 h-2 rounded-full bg-gray-400" />}
               />
