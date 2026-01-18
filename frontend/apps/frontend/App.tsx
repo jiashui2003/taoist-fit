@@ -333,6 +333,45 @@ const App = () => {
     });
   }, []);
 
+  // Handle achievement refresh - recalculate all achievements from historical data
+  const refreshAchievements = useCallback(async (): Promise<Achievement[]> => {
+    console.log('🔄 刷新成就...');
+    try {
+      // 获取最近30天的指标历史
+      const heartHistory = await db.getRecentMetricHistory('heartRate', 30);
+      const stressHistory = await db.getRecentMetricHistory('stress', 30);
+      const energyHistory = await db.getRecentMetricHistory('bodyBattery', 30);
+
+      // 计算连续天数 (从历史数据推断)
+      const uniqueDays = new Set(heartHistory.map(h =>
+        new Date(h.timestamp).toISOString().split('T')[0]
+      ));
+      const calculatedDays = uniqueDays.size;
+
+      // 检测所有成就
+      const result = AchievementService.checkAllAchievements(
+        achievements,
+        calculatedDays,
+        heartHistory,
+        stressHistory,
+        energyHistory,
+        fiveElementsInsight.score,
+        level
+      );
+
+      // 更新状态
+      setAchievements(result.achievements);
+      setConsecutiveDays(calculatedDays);
+
+      console.log(`✅ 成就刷新完成: ${result.newUnlocks.length} 个新解锁`);
+
+      return result.achievements;
+    } catch (error) {
+      console.error('❌ 刷新成就失败:', error);
+      return achievements;
+    }
+  }, [achievements, level, fiveElementsInsight.score]);
+
   // Calculate prediction every render
   const predictedMinutes = PredictionModel.predictTimeToBreakthrough(level);
 
@@ -399,6 +438,7 @@ const App = () => {
             achievements={achievements}
             stats={achievementStats}
             onBack={() => setActiveTab('home')}
+            onRefresh={refreshAchievements}
           />
         );
       case 'export':

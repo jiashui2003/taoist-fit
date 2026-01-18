@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Trophy, Star, Target } from 'lucide-react';
+import { ArrowLeft, Trophy, Star, Target, RefreshCw } from 'lucide-react';
 import { Achievement, AchievementCategory, AchievementStats } from '../types';
 import { AchievementService } from '../services/AchievementService';
 import { AchievementCard } from './AchievementCard';
@@ -8,14 +8,30 @@ interface AchievementViewProps {
     achievements: Achievement[];
     stats: AchievementStats;
     onBack: () => void;
+    onRefresh?: () => Promise<Achievement[]>;
 }
 
 export const AchievementView: React.FC<AchievementViewProps> = ({
     achievements,
     stats,
     onBack,
+    onRefresh,
 }) => {
     const [selectedCategory, setSelectedCategory] = useState<AchievementCategory | 'all'>('all');
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const handleRefresh = async () => {
+        if (!onRefresh || isRefreshing) return;
+        setIsRefreshing(true);
+        try {
+            await onRefresh();
+            console.log('✅ 成就已刷新');
+        } catch (error) {
+            console.error('❌ 刷新成就失败:', error);
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
 
     const categories: (AchievementCategory | 'all')[] = [
         'all',
@@ -59,9 +75,22 @@ export const AchievementView: React.FC<AchievementViewProps> = ({
                         </h1>
                         <p className="text-sm text-[#3A3A3A]">记录你的修仙历程</p>
                     </div>
-                    <div className="text-right">
-                        <div className="text-xl font-bold text-[#9C7D3C]">{unlockedCount}/{totalCount}</div>
-                        <div className="text-xs text-[#3A3A3A]">已解锁</div>
+                    <div className="text-right flex items-center gap-2">
+                        <button
+                            onClick={handleRefresh}
+                            disabled={isRefreshing}
+                            className="p-2 rounded-full hover:bg-[#E6E2D0] transition-colors disabled:opacity-50"
+                            aria-label="刷新成就"
+                        >
+                            <RefreshCw
+                                size={18}
+                                className={`text-[#9C7D3C] ${isRefreshing ? 'animate-spin' : ''}`}
+                            />
+                        </button>
+                        <div>
+                            <div className="text-xl font-bold text-[#9C7D3C]">{unlockedCount}/{totalCount}</div>
+                            <div className="text-xs text-[#3A3A3A]">已解锁</div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -117,8 +146,8 @@ export const AchievementView: React.FC<AchievementViewProps> = ({
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === cat
-                                        ? 'bg-[#9C7D3C] text-white shadow-md'
-                                        : 'bg-white text-[#3A3A3A] border border-[#E6E2D0]'
+                                    ? 'bg-[#9C7D3C] text-white shadow-md'
+                                    : 'bg-white text-[#3A3A3A] border border-[#E6E2D0]'
                                     }`}
                             >
                                 {getCategoryLabel(cat)}
