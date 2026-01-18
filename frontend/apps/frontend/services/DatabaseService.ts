@@ -225,7 +225,7 @@ export class DatabaseService {
         const index = this.db.transaction('activityLog').store.index('by-timestamp');
         const results = await index.getAll();
         return results
-            .sort((a, b) => b.timestamp - a.timestamp)
+            .sort((a, b) => (b.timestamp as unknown as number) - (a.timestamp as unknown as number))
             .slice(0, limit)
             .map(({ id, ...entry }) => entry as ActivityEntry);
     }
@@ -376,7 +376,7 @@ export class DatabaseService {
         ];
 
         for (const storeName of storeNames) {
-            await this.db.clear(storeName);
+            await this.db.clear(storeName as 'healthMetrics' | 'cultivationLevel' | 'shopItems' | 'activityLog' | 'mentorship' | 'metricConfigs' | 'metricHistory' | 'settings');
         }
         console.log('🗑️ 所有数据已清空');
     }

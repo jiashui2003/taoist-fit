@@ -10,7 +10,7 @@ export function usePersistence<T>(
     saveFunction: (key: string, value: T) => Promise<void>,
     debounceMs: number = 1000
 ): void {
-    const timeoutRef = useRef<NodeJS.Timeout>();
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     const previousValueRef = useRef<T>(value);
 
     useEffect(() => {
