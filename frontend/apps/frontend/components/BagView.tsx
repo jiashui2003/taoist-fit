@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MOCK_INVENTORY } from '../constants';
-import { Scroll, Zap, Moon, Sparkles, Download, Trophy, ChevronRight } from 'lucide-react';
+import { Scroll, Zap, Moon, Sparkles, Download, Trophy, ChevronRight, Sun, Volume2, Upload, Settings } from 'lucide-react';
 import { HealthMetrics, ActivityEntry, AchievementStats } from '../types';
 import { ActivityTimeline } from './ActivityTimeline';
+import { ImportDataModal } from './ImportDataModal';
+import { useTheme } from '../contexts/ThemeContext';
+import { VoiceService } from '../services/VoiceService';
 
 interface BagViewProps {
   metrics: HealthMetrics;
@@ -14,9 +17,31 @@ interface BagViewProps {
 }
 
 export const BagView: React.FC<BagViewProps> = ({ metrics, activityLog, lingQiBalance, onExport, onAchievements, achievementStats }) => {
+  const { theme, toggleTheme } = useTheme();
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
   // Calculate total from activity log
   const totalCalories = activityLog.reduce((sum, a) => sum + a.caloriesBurned, 0);
   const totalLingQi = activityLog.reduce((sum, a) => sum + a.lingQiGained, 0);
+  const totalSteps = activityLog.reduce((sum, a) => sum + (a.steps || 0), 0);
+
+  const handleVoiceSummary = async () => {
+    if (isSpeaking) {
+      VoiceService.stop();
+      setIsSpeaking(false);
+      return;
+    }
+
+    setIsSpeaking(true);
+    try {
+      await VoiceService.speakDailySummary(totalSteps || 0, totalCalories);
+    } catch (error) {
+      console.error('语音播报失败:', error);
+    } finally {
+      setIsSpeaking(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full overflow-y-auto pb-24 pt-12 px-4">
@@ -38,6 +63,56 @@ export const BagView: React.FC<BagViewProps> = ({ metrics, activityLog, lingQiBa
             <span className="font-mono font-bold text-[#BFA15F]">{lingQiBalance}</span>
             <span className="text-[10px] text-[#BFA15F]/70">灵气</span>
           </div>
+        </div>
+      </div>
+
+      {/* Settings Section */}
+      <div className="bg-[#FDFCF8] rounded-2xl p-4 shadow-sm border border-[#E6E2D0] mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Settings size={18} className="text-[#9C7D3C]" />
+          <h3 className="font-bold text-[#4A4A4A]">修炼设置</h3>
+        </div>
+
+        <div className="space-y-3">
+          {/* Theme Toggle */}
+          <div className="flex items-center justify-between py-2">
+            <div className="flex items-center gap-2">
+              {theme === 'dark' ? <Moon size={16} className="text-[#9B6B9E]" /> : <Sun size={16} className="text-[#BFA15F]" />}
+              <span className="text-sm text-[#4A4A4A]">{theme === 'dark' ? '玄夜主题' : '白昼主题'}</span>
+            </div>
+            <button
+              onClick={toggleTheme}
+              className={`w-12 h-6 rounded-full transition-colors relative ${theme === 'dark' ? 'bg-[#9B6B9E]' : 'bg-[#D4CEB0]'
+                }`}
+            >
+              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${theme === 'dark' ? 'translate-x-7' : 'translate-x-1'
+                }`} />
+            </button>
+          </div>
+
+          {/* Voice Button */}
+          <button
+            onClick={handleVoiceSummary}
+            className="w-full flex items-center justify-between py-2 px-3 bg-[#F9F8F4] rounded-lg hover:bg-[#E6E2D0] transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Volume2 size={16} className={isSpeaking ? 'text-[#9C7D3C] animate-pulse' : 'text-[#4A4A4A]'} />
+              <span className="text-sm text-[#4A4A4A]">{isSpeaking ? '播放中...' : '语音播报今日总结'}</span>
+            </div>
+            <ChevronRight size={16} className="text-[#9C7D3C]" />
+          </button>
+
+          {/* Import Button */}
+          <button
+            onClick={() => setIsImportOpen(true)}
+            className="w-full flex items-center justify-between py-2 px-3 bg-[#F9F8F4] rounded-lg hover:bg-[#E6E2D0] transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Upload size={16} className="text-[#4A4A4A]" />
+              <span className="text-sm text-[#4A4A4A]">导入修炼数据</span>
+            </div>
+            <ChevronRight size={16} className="text-[#9C7D3C]" />
+          </button>
         </div>
       </div>
 
@@ -129,6 +204,12 @@ export const BagView: React.FC<BagViewProps> = ({ metrics, activityLog, lingQiBa
           </button>
         </div>
       )}
+
+      {/* Import Modal */}
+      <ImportDataModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+      />
     </div>
   );
 };

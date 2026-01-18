@@ -108,6 +108,38 @@ export const SocialView: React.FC<SocialViewProps> = ({
                 </div>
             </div>
 
+            {/* Rankings Section */}
+            <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[#FFD700]">🏆</span>
+                    <h3 className="font-bold text-[#4A4A4A]">修炼榜</h3>
+                </div>
+                <div className="bg-gradient-to-r from-[#FFD700]/10 to-[#BFA15F]/10 rounded-xl p-3 border border-[#FFD700]/30">
+                    {[...cultivators]
+                        .sort((a, b) => {
+                            const stageOrder = ['炼气期', '筑基期', '金丹期', '元婴期'];
+                            const aIdx = stageOrder.indexOf(a.stage);
+                            const bIdx = stageOrder.indexOf(b.stage);
+                            if (aIdx !== bIdx) return bIdx - aIdx;
+                            return b.layer - a.layer;
+                        })
+                        .slice(0, 3)
+                        .map((user, idx) => (
+                            <div key={user.id} className={`flex items-center gap-3 py-2 ${idx < 2 ? 'border-b border-[#FFD700]/20' : ''}`}>
+                                <span className="text-lg font-bold w-6 text-center">
+                                    {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
+                                </span>
+                                <span className="text-xl">{user.avatar}</span>
+                                <div className="flex-1">
+                                    <span className="font-medium text-[#2C2C2C]">{user.name}</span>
+                                    <span className="text-xs text-gray-500 ml-2">{user.stage} 第{user.layer}层</span>
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+
             {/* Fellow Cultivators */}
             <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -128,7 +160,13 @@ export const SocialView: React.FC<SocialViewProps> = ({
                             <p className="text-[10px] text-gray-400">
                                 {fellow.stage} 第{fellow.layer}层
                             </p>
-                            <p className="text-[10px] text-[#6B8EAD]">{fellow.specialty}</p>
+                            <p className="text-[10px] text-[#6B8EAD] mb-2">{fellow.specialty}</p>
+                            <button
+                                onClick={() => alert(`🙏 已向 ${fellow.name} 送出祝福！`)}
+                                className="w-full text-xs py-1 bg-[#6B8EAD]/10 text-[#6B8EAD] rounded-full hover:bg-[#6B8EAD]/20 transition-colors"
+                            >
+                                🙏 祝福道友
+                            </button>
                         </motion.div>
                     ))}
                 </div>

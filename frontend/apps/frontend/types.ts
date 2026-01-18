@@ -45,6 +45,7 @@ export interface ActivityEntry {
   caloriesBurned: number; // Raw kcal
   lingQiGained: number; // After efficiency conversion
   type: 'walk' | 'run' | 'meditation' | 'exercise';
+  steps?: number; // Optional steps count for walking/running
 }
 
 // Shop item for the marketplace

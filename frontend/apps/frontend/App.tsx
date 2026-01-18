@@ -9,6 +9,8 @@ import { OfflineBanner } from './components/OfflineBanner';
 import { MetricDetailView } from './components/MetricDetailView';
 import { AchievementView } from './components/AchievementView';
 import { ExportView } from './components/ExportView';
+import { ThemeProvider } from './contexts/ThemeContext';
+import './styles/themes.css';
 import {
   CultivationStage,
   CultivationLevel,
@@ -536,4 +538,11 @@ const NavButton = ({ active, onClick, icon, label }: { active: boolean; onClick:
   </button>
 );
 
-export default App;
+// Wrap App with ThemeProvider
+const AppWithTheme = () => (
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>
+);
+
+export default AppWithTheme;
