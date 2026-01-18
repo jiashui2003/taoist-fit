@@ -205,3 +205,36 @@ export interface MetricInsight {
   timestamp: number;
   data?: TrendAnalysis | AnomalyAlert | HealthRecommendation | PredictiveInsight;
 }
+
+// ==================== Phase 5: Achievement System ====================
+
+export type AchievementCategory =
+  | 'diligence'    // 修炼勤勉
+  | 'heart'        // 心脉稳定
+  | 'stress'       // 压力克制
+  | 'energy'       // 灵气充沛
+  | 'balance'      // 五行平衡
+  | 'breakthrough'; // 境界突破
+
+export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'special';
+
+export interface Achievement {
+  id: string;
+  name: string;           // 修仙风格名称
+  description: string;    // 获取条件描述
+  category: AchievementCategory;
+  tier: AchievementTier;
+  icon: string;           // Emoji图标
+  unlocked: boolean;
+  unlockedAt?: number;    // 解锁时间戳
+  progress: number;       // 0-100 进度
+  requirement: number;    // 需要的天数/分数
+  currentValue: number;   // 当前值
+}
+
+export interface AchievementStats {
+  total: number;
+  unlocked: number;
+  byCategory: Record<AchievementCategory, { total: number; unlocked: number }>;
+  recentUnlocks: Achievement[];
+}

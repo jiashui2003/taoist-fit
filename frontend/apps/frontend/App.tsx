@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Home, BarChart2, ScrollText, Users, ShoppingBag } from 'lucide-react';
+import { Home, BarChart2, ScrollText, Users, ShoppingBag, Trophy } from 'lucide-react';
 import { CultivationView } from './components/CultivationView';
 import { DataAnalysisView } from './components/DataAnalysisView';
 import { BagView } from './components/BagView';
 import { ShopView } from './components/ShopView';
 import { SocialView } from './components/SocialView';
 import { OfflineBanner } from './components/OfflineBanner';
-import { MetricDetailView } from './components/MetricDetailView'; // NEW
+import { MetricDetailView } from './components/MetricDetailView';
+import { AchievementView } from './components/AchievementView';
 import {
   CultivationStage,
   CultivationLevel,
@@ -15,7 +16,9 @@ import {
   ExtendedHealthMetrics,
   MetricConfig,
   MentorshipStatus,
-  CultivatorUser
+  CultivatorUser,
+  Achievement,
+  AchievementStats
 } from './types';
 import {
   MOCK_ACTIVITY_LOG,
@@ -26,13 +29,14 @@ import {
 } from './constants';
 import { PredictionModel } from './services/PredictionModel';
 import { calculateFiveElementsInsight } from './services/HealthInsightService';
+import { AchievementService } from './services/AchievementService';
 import { db } from './services/DatabaseService';
 import { useOnlineStatus } from './hooks/usePersistence';
 
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState<'home' | 'analysis' | 'bag' | 'shop' | 'social'>('home');
-  const [selectedMetric, setSelectedMetric] = useState<string | null>(null); // NEW: For metric detail view
+  const [activeTab, setActiveTab] = useState<'home' | 'analysis' | 'bag' | 'shop' | 'social' | 'achievements'>('home');
+  const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Network status
@@ -73,6 +77,18 @@ const App = () => {
 
   // Cultivators list
   const [cultivators] = useState<CultivatorUser[]>(MOCK_CULTIVATORS);
+
+  // Achievements state
+  const [achievements, setAchievements] = useState<Achievement[]>(
+    AchievementService.initializeAchievements()
+  );
+  const [consecutiveDays, setConsecutiveDays] = useState(1);
+
+  // Calculate achievement statistics
+  const achievementStats: AchievementStats = useMemo(
+    () => AchievementService.getStats(achievements),
+    [achievements]
+  );
 
   // Calculate Five Elements insight using only enabled metrics
   const enabledConfigs = metricConfigs.filter((c) => c.enabled);
@@ -369,6 +385,14 @@ const App = () => {
             onRequestMentor={handleRequestMentor}
           />
         );
+      case 'achievements':
+        return (
+          <AchievementView
+            achievements={achievements}
+            stats={achievementStats}
+            onBack={() => setActiveTab('home')}
+          />
+        );
       default:
         return <CultivationView metrics={metrics} level={level} predictedMinutes={predictedMinutes} />;
     }
@@ -414,10 +438,10 @@ const App = () => {
             label="百宝"
           />
           <NavButton
-            active={activeTab === 'social'}
-            onClick={() => setActiveTab('social')}
-            icon={<Users size={20} />}
-            label="道友"
+            active={activeTab === 'achievements'}
+            onClick={() => setActiveTab('achievements')}
+            icon={<Trophy size={20} />}
+            label="成就"
           />
         </div>
 
